@@ -1,0 +1,1396 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Learnify AI – Study Smarter with AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root {
+    --primary: #4F46E5;
+    --primary-dark: #3730A3;
+    --primary-light: #EEF2FF;
+    --accent: #10B981;
+    --accent-dark: #059669;
+    --accent-light: #D1FAE5;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --bg: #F5F7FF;
+    --surface: #FFFFFF;
+    --text: #0F172A;
+    --text-secondary: #64748B;
+    --border: #E2E8F0;
+    --shadow: 0 4px 20px rgba(79,70,229,0.10);
+    --shadow-md: 0 8px 32px rgba(79,70,229,0.16);
+    --shadow-lg: 0 20px 60px rgba(79,70,229,0.20);
+    --shadow-sm: 0 1px 3px rgba(79,70,229,0.08);
+    --radius: 20px;
+    --radius-sm: 14px;
+    --radius-xs: 10px;
+    --gradient-brand: linear-gradient(135deg,#4F46E5 0%,#7C3AED 50%,#10B981 100%);
+    --gradient-card: linear-gradient(135deg,#4F46E5,#7C3AED);
+    --gradient-green: linear-gradient(135deg,#10B981,#059669);
+    --gradient-gold: linear-gradient(135deg,#F59E0B,#D97706);
+    --gradient-red: linear-gradient(135deg,#EF4444,#DC2626);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); min-height: 100vh; display: flex; justify-content: center; -webkit-font-smoothing: antialiased; }
+  #root { width: 100%; max-width: 430px; min-height: 100vh; background: var(--bg); position: relative; overflow: hidden; }
+
+  /* ── DESKTOP FULL SCREEN ── */
+  @media (min-width: 768px) {
+    body { background: #E8ECF8; justify-content: flex-start; align-items: stretch; }
+    #root { max-width: 100%; width: 100%; display: flex; flex-direction: row; min-height: 100vh; background: transparent; overflow: visible; }
+    .app-shell { display: flex; flex: 1; width: 100%; min-height: 100vh; }
+    .desktop-sidebar { display: flex !important; flex-direction: column; width: 270px; min-height: 100vh; background: var(--surface); box-shadow: 2px 0 32px rgba(79,70,229,0.08); padding: 28px 0 24px; position: sticky; top: 0; height: 100vh; z-index: 30; flex-shrink: 0; }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 22px 28px; border-bottom: 1.5px solid var(--border); margin-bottom: 16px; }
+    .sidebar-nav-item { display: flex; align-items: center; gap: 14px; padding: 13px 22px; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--text-secondary); border: none; background: none; width: 100%; text-align: left; transition: all 0.2s; }
+    .sidebar-nav-item:hover { background: var(--primary-light); color: var(--primary); }
+    .sidebar-nav-item.active { background: var(--primary-light); color: var(--primary); border-right: 3px solid var(--primary); }
+    .sidebar-nav-item .nav-icon { font-size: 20px; }
+    .sidebar-bottom { margin-top: auto; padding: 0 16px; }
+    .desktop-main { flex: 1; overflow-y: auto; min-height: 100vh; background: var(--bg); }
+    .desktop-main .screen { width: 100%; max-width: 100%; }
+    .bottom-nav { display: none !important; }
+    .modal-overlay { align-items: center; }
+    .modal { border-radius: 24px; max-width: 520px; margin: 0 auto; }
+    .toast { bottom: 36px; }
+    .topbar { padding: 18px 40px; }
+  }
+  @media (max-width: 767px) {
+    .desktop-sidebar { display: none !important; }
+    .app-shell { display: contents; }
+    .desktop-main { display: contents; }
+  }
+  .screen { width: 100%; min-height: 100vh; display: flex; flex-direction: column; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes slideUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.04);} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  @keyframes countUp { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
+  @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(79,70,229,0.3)} 50%{box-shadow:0 0 40px rgba(79,70,229,0.6)} }
+  .btn { display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 24px; border:none; border-radius:50px; cursor:pointer; font-size:15px; font-weight:700; transition:all 0.2s ease; font-family:inherit; letter-spacing:-0.1px; }
+  .btn:active { transform:scale(0.97); }
+  .btn-primary { background:var(--gradient-card); color:#fff; box-shadow:0 4px 20px rgba(79,70,229,0.35); }
+  .btn-primary:hover { box-shadow:0 8px 28px rgba(79,70,229,0.50); transform:translateY(-1px); }
+  .btn-secondary { background:var(--primary-light); color:var(--primary-dark); }
+  .btn-ghost { background:transparent; color:var(--text-secondary); border:1.5px solid var(--border); }
+  .btn-danger { background:var(--gradient-red); color:#fff; }
+  .btn-success { background:var(--gradient-green); color:#fff; box-shadow:0 4px 16px rgba(16,185,129,0.3); }
+  .btn-accent { background:var(--gradient-green); color:#fff; box-shadow:0 4px 16px rgba(16,185,129,0.3); }
+  .btn-gold { background:var(--gradient-gold); color:#fff; box-shadow:0 4px 16px rgba(245,158,11,0.3); }
+  .btn-full { width:100%; }
+  .btn-sm { padding:9px 18px; font-size:13px; }
+  .btn-lg { padding:18px 32px; font-size:17px; }
+  .input-group { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+  .input-label { font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; }
+  .input { padding:13px 16px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:15px; color:var(--text); background:var(--surface); outline:none; transition:border-color 0.2s,box-shadow 0.2s; }
+  .input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(46,93,168,0.12); }
+  textarea.input { resize:vertical; min-height:140px; line-height:1.6; }
+  .card { background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; }
+  .card-glass { background:rgba(255,255,255,0.85); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.6); border-radius:var(--radius); box-shadow:var(--shadow-md); padding:20px; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:rgba(255,255,255,0.95); backdrop-filter:blur(20px); box-shadow:0 1px 0 var(--border); position:sticky; top:0; z-index:10; }
+  .topbar-title { font-size:18px; font-weight:700; color:var(--text); }
+  .back-btn { background:var(--primary-light); border:none; cursor:pointer; font-size:14px; color:var(--primary); padding:8px 14px; border-radius:10px; font-weight:700; transition:all 0.2s; font-family:inherit; }
+  .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(255,255,255,0.95); backdrop-filter:blur(20px); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-around; padding:10px 0 20px; z-index:20; box-shadow:0 -8px 32px rgba(79,70,229,0.08); }
+  .nav-item { display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:4px 12px; border-radius:12px; border:none; background:none; transition:all 0.2s; }
+  .nav-icon { font-size:22px; }
+  .nav-item span { font-size:10px; font-weight:600; }
+  .badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:50px; font-size:11px; font-weight:700; }
+  .badge-premium { background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#fff; }
+  .badge-free { background:var(--primary-light); color:var(--primary-dark); }
+  .flashcard-container { perspective:1000px; width:100%; cursor:pointer; user-select:none; }
+  .flashcard-inner { position:relative; width:100%; height:220px; transform-style:preserve-3d; transition:transform 0.55s cubic-bezier(0.4,0,0.2,1); }
+  .flashcard-inner.flipped { transform:rotateY(180deg); }
+  .flashcard-face { position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:var(--radius); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center; box-shadow:var(--shadow-md); }
+  .flashcard-front { background:var(--gradient-card); color:#fff; }
+  .flashcard-back { background:var(--gradient-green); color:#fff; transform:rotateY(180deg); }
+  .flashcard-label { font-size:11px; font-weight:700; opacity:0.75; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:12px; }
+  .flashcard-text { font-size:18px; font-weight:600; line-height:1.5; }
+  .quiz-option { display:flex; align-items:center; gap:12px; padding:14px 18px; border:2px solid var(--border); border-radius:var(--radius-sm); cursor:pointer; background:var(--surface); transition:all 0.2s; margin-bottom:10px; font-size:15px; font-weight:500; color:var(--text); }
+  .quiz-option:hover { border-color:var(--primary); background:var(--primary-light); }
+  .quiz-option.correct { border-color:var(--success); background:#d1fae5; color:#065f46; }
+  .quiz-option.wrong { border-color:var(--danger); background:#fee2e2; color:#991b1b; }
+  .quiz-option.disabled { cursor:default; }
+  .progress-bar { height:8px; background:var(--border); border-radius:50px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:50px; transition:width 0.4s ease; }
+  .deck-card { background:var(--surface); border-radius:var(--radius); padding:18px 20px; display:flex; align-items:center; gap:16px; cursor:pointer; box-shadow:var(--shadow); margin-bottom:12px; transition:all 0.2s; border:1.5px solid transparent; }
+  .deck-card:hover { border-color:var(--primary); box-shadow:var(--shadow-md); transform:translateY(-1px); }
+  .deck-icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0; }
+  .onboard-dot { width:8px; height:8px; border-radius:50%; transition:all 0.3s; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.5); backdrop-filter:blur(4px); z-index:100; display:flex; align-items:flex-end; justify-content:center; animation:fadeIn 0.2s ease; }
+  .modal { background:var(--surface); border-radius:28px 28px 0 0; width:100%; max-width:430px; padding:28px; animation:slideUp 0.3s ease; max-height:92vh; overflow-y:auto; }
+  .modal-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 20px; }
+  .stat-box { background:var(--surface); border-radius:var(--radius-sm); padding:16px; text-align:center; box-shadow:var(--shadow); }
+  .stat-number { font-size:28px; font-weight:800; color:var(--primary); }
+  .stat-label { font-size:12px; color:var(--text-secondary); font-weight:600; margin-top:2px; }
+  .premium-banner { background:var(--gradient-brand); border-radius:var(--radius); padding:22px; color:#fff; position:relative; overflow:hidden; }
+  .premium-banner::before { content:""; position:absolute; top:-40px; right:-40px; width:120px; height:120px; background:rgba(255,255,255,0.08); border-radius:50%; }
+  .premium-banner::after { content:""; position:absolute; bottom:-30px; left:-20px; width:90px; height:90px; background:rgba(255,255,255,0.06); border-radius:50%; }
+  .paywall-feature { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+  .diff-btn { flex:1; padding:12px; border:none; border-radius:12px; cursor:pointer; font-weight:600; font-size:14px; transition:all 0.2s; }
+  .diff-easy { background:#d1fae5; color:#065f46; }
+  .diff-hard { background:#fee2e2; color:#991b1b; }
+  .empty-state { display:flex; flex-direction:column; align-items:center; gap:12px; padding:48px 24px; text-align:center; }
+  .tag { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:50px; font-size:12px; font-weight:600; background:var(--primary-light); color:var(--primary-dark); }
+  .toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#1E293B; color:#fff; padding:12px 22px; border-radius:50px; font-size:14px; font-weight:500; z-index:200; animation:slideUp 0.3s ease; white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,0.25); }
+  .header-gradient { background:var(--gradient-brand); padding:28px 20px 44px; color:#fff; position:relative; overflow:hidden; }
+  .header-gradient::before { content:""; position:absolute; top:-50px; right:-50px; width:180px; height:180px; background:rgba(255,255,255,0.07); border-radius:50%; }
+  .header-gradient::after { content:""; position:absolute; bottom:-20px; left:0; right:0; height:40px; background:var(--bg); border-radius:22px 22px 0 0; }
+  .swipe-hint { display:flex; align-items:center; justify-content:center; gap:8px; color:var(--text-secondary); font-size:13px; padding:12px; }
+  /* PDF upload zone */
+  .pdf-dropzone { border:2.5px dashed #bfdbfe; border-radius:var(--radius); padding:32px 20px; text-align:center; cursor:pointer; background:#f0f7ff; transition:all 0.2s; }
+  .pdf-dropzone:hover, .pdf-dropzone.drag { border-color:var(--primary); background:var(--primary-light); }
+  /* Payment card styles */
+  .card-field { padding:15px 16px; border:2px solid var(--border); border-radius:var(--radius-sm); font-size:15px; color:var(--text); background:var(--surface); outline:none; transition:all 0.2s; width:100%; font-family:inherit; letter-spacing:0.5px; }
+  .card-field:focus { border-color:var(--primary); box-shadow:0 0 0 4px rgba(79,70,229,0.10); }
+  .secure-badge { display:inline-flex; align-items:center; gap:5px; background:#f0fdf4; color:#16a34a; border:1.5px solid #bbf7d0; border-radius:50px; padding:5px 13px; font-size:12px; font-weight:700; }
+  .plan-card { border-radius:18px; padding:20px; cursor:pointer; transition:all 0.2s; border:2px solid var(--border); background:var(--surface); }
+  .plan-card.selected { border-color:var(--primary); background:var(--primary-light); box-shadow:0 0 0 4px rgba(79,70,229,0.08); }
+  .plan-card:hover:not(.selected) { border-color:#a5b4fc; transform:translateY(-1px); }
+  .trust-badge { display:inline-flex; align-items:center; gap:6px; background:var(--surface); border:1.5px solid var(--border); border-radius:50px; padding:6px 14px; font-size:12px; font-weight:600; color:var(--text-secondary); box-shadow:var(--shadow-sm); }
+  .testimonial-card { background:var(--surface); border-radius:16px; padding:18px; box-shadow:var(--shadow-sm); border:1.5px solid var(--border); }
+  .star-rating { color:#F59E0B; font-size:14px; letter-spacing:1px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  // Set PDF.js worker
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+</script>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+const LOGO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234F46E5'/%3E%3Cstop offset='100%25' stop-color='%2310B981'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='48' fill='url(%23g)'/%3E%3Ctext x='50' y='67' font-size='52' text-anchor='middle' fill='white'%3E📚%3C/text%3E%3C/svg%3E";
+
+const DECK_COLORS = [
+  { bg: "linear-gradient(135deg,#4F46E5,#7C3AED)", icon: "📚" },
+  { bg: "linear-gradient(135deg,#7C3AED,#6D28D9)", icon: "🔬" },
+  { bg: "linear-gradient(135deg,#F59E0B,#D97706)", icon: "🧮" },
+  { bg: "linear-gradient(135deg,#EF4444,#DC2626)", icon: "🏛️" },
+  { bg: "linear-gradient(135deg,#06B6D4,#0891B2)", icon: "🌍" },
+  { bg: "linear-gradient(135deg,#10B981,#059669)", icon: "💡" },
+];
+
+const storage = {
+  get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+const AI_KEY = "sg_openai_key";
+
+// ── LUHN ALGORITHM (card number validation) ──
+function luhnCheck(num) {
+  const digits = num.replace(/\s/g, "");
+  if (digits.length < 13) return false;
+  let sum = 0, shouldDouble = false;
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let d = parseInt(digits[i]);
+    if (shouldDouble) { d *= 2; if (d > 9) d -= 9; }
+    sum += d;
+    shouldDouble = !shouldDouble;
+  }
+  return sum % 10 === 0;
+}
+
+// ── EXPIRY DATE VALIDATION ──
+function isExpired(mm, yy) {
+  const now = new Date();
+  const currentYear = now.getFullYear() % 100;
+  const currentMonth = now.getMonth() + 1;
+  const m = parseInt(mm, 10), y = parseInt(yy, 10);
+  if (y < currentYear) return true;
+  if (y === currentYear && m < currentMonth) return true;
+  return false;
+}
+
+// ── PDF TEXT EXTRACTOR ──
+async function extractTextFromPDF(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const typedArray = new Uint8Array(e.target.result);
+        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+        let fullText = "";
+        for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageText = content.items.map(item => item.str).join(" ");
+          fullText += pageText + "\n";
+        }
+        resolve(fullText.trim());
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function generateFlashcardsAI(notes, apiKey) {
+  if (apiKey) {
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: "gpt-3.5-turbo", messages: [{ role: "user", content: `Convert these notes into 10 flashcards. Return ONLY a JSON array with "question" and "answer" fields.\n\n${notes.substring(0, 4000)}` }], temperature: 0.7 }),
+      });
+      const data = await res.json();
+      const match = (data.choices?.[0]?.message?.content || "").match(/\[[\s\S]*\]/);
+      if (match) return JSON.parse(match[0]);
+    } catch(e) {}
+  }
+  const lines = notes.split(/[.!\n]/).map(s => s.trim()).filter(s => s.length > 20);
+  if (lines.length >= 3) return lines.slice(0, 10).map(line => ({ question: `What does the following describe? "${line.substring(0,70)}..."`, answer: line }));
+  return [
+    { question: "What is the main concept of these notes?", answer: notes.substring(0, 120) },
+    { question: "Define the key idea discussed.", answer: "The key idea: " + notes.substring(0, 80) },
+    { question: "What is the primary purpose explained?", answer: "To understand and apply the core concepts outlined." },
+    { question: "Summarize the core idea.", answer: notes.substring(0, 100) },
+    { question: "What are the important details?", answer: "The facts and concepts outlined in the notes." },
+    { question: "How would you apply this knowledge?", answer: "By practicing and testing understanding regularly." },
+    { question: "What makes this topic significant?", answer: "It forms the foundation for advanced understanding." },
+    { question: "What should you remember most?", answer: "Core definitions, key principles, and practical applications." },
+  ];
+}
+
+async function generateQuizAI(flashcards, apiKey) {
+  if (apiKey) {
+    try {
+      const txt = flashcards.map(c => `Q: ${c.question}\nA: ${c.answer}`).join("\n\n");
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: "gpt-3.5-turbo", messages: [{ role: "user", content: `Convert these flashcards into quiz questions. Return ONLY a JSON array with "question", "options" (4 strings), "correct" (0-3), "type" ("mcq"/"tf").\n\n${txt}` }], temperature: 0.6 }),
+      });
+      const data = await res.json();
+      const match = (data.choices?.[0]?.message?.content || "").match(/\[[\s\S]*\]/);
+      if (match) return JSON.parse(match[0]);
+    } catch(e) {}
+  }
+  return flashcards.slice(0, 6).map((card, i) => {
+    if (i % 3 === 2) return { question: card.question, type: "tf", options: ["True","False","",""], correct: 0 };
+    const opts = [card.answer, "An unrelated concept entirely", "The opposite of what was described", "A different definition altogether"].sort(() => Math.random() - 0.5);
+    return { question: card.question, type: "mcq", options: opts, correct: opts.indexOf(card.answer) };
+  });
+}
+
+function Toast({ message }) {
+  return <div className="toast">{message}</div>;
+}
+
+function BrandLogo({ size = 44 }) {
+  return <img src={LOGO} style={{ width: size, height: size, objectFit: "contain", borderRadius: "50%" }} alt="Learnify AI" />;
+}
+
+function BrandName({ fontSize = 22 }) {
+  return (
+    <span style={{ fontSize, fontWeight: 900, letterSpacing: -0.8, fontFamily: "Inter, sans-serif" }}>
+      <span style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Learn</span>
+      <span style={{ background: "linear-gradient(135deg,#10B981,#059669)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>ify</span>
+      <span style={{ color: "#94A3B8", fontWeight: 500, fontSize: fontSize * 0.75 }}> AI</span>
+    </span>
+  );
+}
+
+// ── ONBOARDING ──
+function OnboardingScreen({ onDone }) {
+  const [step, setStep] = useState(0);
+  const slides = [
+    { logo: true, title: "Study Smarter with AI", desc: "Upload any PDF or paste notes — AI creates perfect flashcards instantly. Join 12,000+ students already learning smarter.", color: "linear-gradient(145deg,#4F46E5 0%,#7C3AED 60%,#10B981 100%)" },
+    { icon: "📄", title: "Upload Any PDF Instantly", desc: "Drop lecture slides, textbook chapters, or study guides. AI extracts key concepts and creates smart flashcards automatically.", color: "linear-gradient(145deg,#7C3AED 0%,#4F46E5 100%)" },
+    { icon: "🎯", title: "Quiz & Track Progress", desc: "AI-generated MCQ and True/False quizzes test your knowledge. Watch your scores climb and build daily study streaks.", color: "linear-gradient(145deg,#059669 0%,#10B981 100%)" },
+  ];
+  const slide = slides[step];
+  return (
+    <div className="screen" style={{ background: slide.color, justifyContent: "space-between", padding: "60px 32px 48px" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24, color: "#fff", textAlign: "center" }}>
+        {slide.logo
+          ? <div style={{ animation: "pulse 2s infinite", background: "rgba(255,255,255,0.15)", borderRadius: "50%", padding: 20 }}><BrandLogo size={100} /></div>
+          : <div style={{ fontSize: 90 }}>{slide.icon}</div>
+        }
+        <h1 style={{ fontSize: 28, fontWeight: 800 }}>{slide.title}</h1>
+        <p style={{ fontSize: 16, opacity: 0.92, lineHeight: 1.7, maxWidth: 280 }}>{slide.desc}</p>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 4 }}>
+          {slides.map((_, i) => <div key={i} className="onboard-dot" style={{ background: i === step ? "#fff" : "rgba(255,255,255,0.35)", width: i === step ? 28 : 6 }} />)}
+        </div>
+        {step < slides.length - 1
+          ? <button className="btn" style={{ background: "#fff", color: "#2E5DA8", fontWeight: 700 }} onClick={() => setStep(s => s + 1)}>Next →</button>
+          : <button className="btn" style={{ background: "#fff", color: "#2E5DA8", fontWeight: 700 }} onClick={onDone}>Get Started 🚀</button>
+        }
+        {step < slides.length - 1 && <button className="btn btn-ghost" style={{ color: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(255,255,255,0.4)" }} onClick={onDone}>Skip</button>}
+      </div>
+    </div>
+  );
+}
+
+// ── AUTH ──
+function AuthScreen({ onAuth }) {
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setError(""); setLoading(true);
+    await new Promise(r => setTimeout(r, 700));
+    const users = storage.get("sg_users", []);
+    if (!email || !password) { setError("Please fill all fields"); setLoading(false); return; }
+    if (mode === "signup") {
+      if (users.find(u => u.email === email)) { setError("Email already registered"); setLoading(false); return; }
+      if (password.length < 6) { setError("Password must be 6+ characters"); setLoading(false); return; }
+      const u = { id: Date.now(), email, name: name || email.split("@")[0], premium: false };
+      storage.set("sg_users", [...users, { ...u, password }]);
+      storage.set("sg_current", u);
+      onAuth(u);
+    } else {
+      const found = users.find(u => u.email === email && u.password === password);
+      if (!found) { setError("Invalid email or password"); setLoading(false); return; }
+      const { password: _, ...safe } = found;
+      storage.set("sg_current", safe);
+      onAuth(safe);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="screen" style={{ background: "linear-gradient(170deg,#4F46E5 0%,#7C3AED 35%,var(--bg) 35%)" }}>
+      <div style={{ padding: "44px 24px 24px", textAlign: "center", color: "#fff" }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <div style={{ background: "rgba(255,255,255,0.18)", borderRadius: "50%", padding: 14 }}>
+            <BrandLogo size={64} />
+          </div>
+        </div>
+        <BrandName fontSize={26} />
+        <p style={{ opacity: 0.85, marginTop: 4, fontSize: 14 }}>AI-Powered Study Assistant</p>
+      </div>
+      <div style={{ flex: 1, padding: "0 20px 40px" }}>
+        <div className="card" style={{ padding: 28 }}>
+          <div style={{ display: "flex", gap: 0, marginBottom: 24, background: "var(--bg)", borderRadius: 12, padding: 3 }}>
+            {["login","signup"].map(m => (
+              <button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 10, cursor: "pointer", fontWeight: 600, fontSize: 14, transition: "all 0.2s", background: mode === m ? "#fff" : "transparent", color: mode === m ? "var(--primary)" : "var(--text-secondary)", boxShadow: mode === m ? "0 2px 8px rgba(46,93,168,0.15)" : "none" }}>
+                {m === "login" ? "Sign In" : "Sign Up"}
+              </button>
+            ))}
+          </div>
+          {mode === "signup" && <div className="input-group"><label className="input-label">Full Name</label><input className="input" placeholder="Alex Johnson" value={name} onChange={e => setName(e.target.value)} /></div>}
+          <div className="input-group"><label className="input-label">Email Address</label><input className="input" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} /></div>
+          <div className="input-group"><label className="input-label">Password</label><input className="input" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()} /></div>
+          {error && <div style={{ color: "var(--danger)", fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "#fee2e2", borderRadius: 8 }}>⚠️ {error}</div>}
+          <button className="btn btn-primary btn-full" onClick={handleSubmit} disabled={loading} style={{ marginTop: 8 }}>
+            {loading ? "⏳ Loading..." : mode === "login" ? "🔑 Sign In" : "🚀 Create Account"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── HOME ──
+function HomeScreen({ user, onNavigate, stats }) {
+  const today = new Date().toDateString();
+  const cardsToday = storage.get(`sg_cards_${today}`, 0);
+  const quizzesToday = storage.get(`sg_quizzes_${today}`, 0);
+  const actions = [
+    { icon: "📄", label: "Upload PDF", color: "linear-gradient(135deg,#4F46E5,#7C3AED)", action: "generate" },
+    { icon: "📚", label: "My Decks", color: "linear-gradient(135deg,#7C3AED,#6D28D9)", action: "decks" },
+    { icon: "📖", label: "Study Mode", color: "linear-gradient(135deg,#10B981,#059669)", action: "study" },
+    { icon: "🧪", label: "Take Quiz", color: "linear-gradient(135deg,#F59E0B,#D97706)", action: "quiz" },
+  ];
+  return (
+    <div className="screen">
+      <div className="header-gradient" style={{ paddingBottom: 50 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <BrandLogo size={38} />
+            <BrandName fontSize={20} />
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {user.premium && <span className="badge badge-premium">👑 Pro</span>}
+            <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, cursor: "pointer", fontWeight: 700, color: "#fff" }} onClick={() => onNavigate("profile")}>
+              {(user.name || "A")[0].toUpperCase()}
+            </div>
+          </div>
+        </div>
+        <p style={{ opacity: 0.85, fontSize: 13, marginBottom: 2 }}>Good {new Date().getHours() < 12 ? "Morning" : new Date().getHours() < 17 ? "Afternoon" : "Evening"} 👋</p>
+        <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 16 }}>{user.name || "Learner"}</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+          {[["📚", stats.totalCards, "Cards"], ["🧪", stats.totalQuizzes, "Quizzes"], ["🔥", stats.streak, "Streak"]].map(([icon, val, label]) => (
+            <div key={label} style={{ background: "rgba(255,255,255,0.18)", borderRadius: 14, padding: "12px 8px", textAlign: "center" }}>
+              <div style={{ fontSize: 20, fontWeight: 800 }}>{icon} {val}</div>
+              <div style={{ fontSize: 11, opacity: 0.85 }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ padding: "28px 20px 90px" }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14 }}>Quick Actions</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 24 }}>
+          {actions.map(a => (
+            <button key={a.action} onClick={() => onNavigate(a.action)} style={{ background: a.color, border: "none", borderRadius: 18, padding: "22px 16px", cursor: "pointer", textAlign: "center", boxShadow: "0 6px 20px rgba(0,0,0,0.12)", transition: "all 0.2s", color: "#fff" }}
+              onMouseOver={e => e.currentTarget.style.transform = "scale(1.03)"}
+              onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}>
+              <div style={{ fontSize: 36, marginBottom: 8 }}>{a.icon}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, whiteSpace: "pre-line", lineHeight: 1.3 }}>{a.label}</div>
+            </button>
+          ))}
+        </div>
+        {!user.premium && (
+          <div className="card" style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700 }}>📊 Daily Usage</h3>
+              <span className="badge badge-free">Free Plan</span>
+            </div>
+            {[["✨ Cards", cardsToday, 10], ["🧪 Quizzes", quizzesToday, 1]].map(([label, used, limit]) => (
+              <div key={label} style={{ marginBottom: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 13, color: "var(--text-secondary)" }}>
+                  <span>{label}</span><span style={{ fontWeight: 600, color: used >= limit ? "var(--danger)" : "var(--success)" }}>{used}/{limit}</span>
+                </div>
+                <div className="progress-bar"><div className="progress-fill" style={{ width: `${Math.min(100, used/limit*100)}%`, background: used >= limit ? "linear-gradient(90deg,#f87171,var(--danger))" : undefined }} /></div>
+              </div>
+            ))}
+            <button className="btn btn-gold btn-full btn-sm" onClick={() => onNavigate("premium")} style={{ borderRadius: 14 }}>👑 Upgrade to Premium — from $3.99/mo</button>
+          </div>
+        )}
+        {stats.recentDecks.length > 0 && (
+          <>
+            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Recent Decks</h3>
+            {stats.recentDecks.slice(0, 2).map(deck => (
+              <div key={deck.id} className="deck-card" onClick={() => onNavigate("study", { deck })}>
+                <div className="deck-icon" style={{ background: deck.color?.bg || DECK_COLORS[0].bg }}><span>{deck.color?.icon || "📚"}</span></div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>{deck.name}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>{deck.cards?.length || 0} cards</div>
+                </div>
+                <span style={{ fontSize: 18, color: "var(--text-secondary)" }}>›</span>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── GENERATOR (with PDF upload) ──
+function GeneratorScreen({ user, onNavigate, onSave, showToast }) {
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [cards, setCards] = useState([]);
+  const [step, setStep] = useState("input");
+  const [deckName, setDeckName] = useState("");
+  const [showSave, setShowSave] = useState(false);
+  const [flipped, setFlipped] = useState({});
+  const [pdfFile, setPdfFile] = useState(null);
+  const [inputMode, setInputMode] = useState("pdf"); // "pdf" or "text"
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
+  const apiKey = storage.get(AI_KEY, "");
+  const today = new Date().toDateString();
+  const cardsToday = storage.get(`sg_cards_${today}`, 0);
+  const LIMIT = 10;
+
+  const handlePDFUpload = async (file) => {
+    if (!file || file.type !== "application/pdf") { showToast("⚠️ Please upload a PDF file"); return; }
+    setPdfFile(file);
+    setPdfLoading(true);
+    try {
+      const text = await extractTextFromPDF(file);
+      if (!text || text.length < 50) { showToast("⚠️ Couldn't extract text from this PDF"); setPdfLoading(false); return; }
+      setNotes(text);
+      showToast("✅ PDF extracted! Generating flashcards...");
+      setPdfLoading(false);
+      // Auto-generate
+      if (!user.premium && cardsToday >= LIMIT) { onNavigate("premium"); return; }
+      setLoading(true);
+      const result = await generateFlashcardsAI(text, apiKey);
+      const limited = user.premium ? result : result.slice(0, Math.min(result.length, LIMIT - cardsToday));
+      storage.set(`sg_cards_${today}`, cardsToday + limited.length);
+      setCards(limited.map((c, i) => ({ ...c, id: Date.now() + i })));
+      setStep("result");
+      setLoading(false);
+    } catch (err) {
+      showToast("⚠️ Failed to read PDF. Try a different file.");
+      setPdfLoading(false);
+    }
+  };
+
+  const generate = async () => {
+    if (!notes.trim()) return;
+    if (!user.premium && cardsToday >= LIMIT) { onNavigate("premium"); return; }
+    setLoading(true);
+    const result = await generateFlashcardsAI(notes, apiKey);
+    const limited = user.premium ? result : result.slice(0, Math.min(result.length, LIMIT - cardsToday));
+    storage.set(`sg_cards_${today}`, cardsToday + limited.length);
+    setCards(limited.map((c, i) => ({ ...c, id: Date.now() + i })));
+    setStep("result");
+    setLoading(false);
+  };
+
+  const saveCards = () => {
+    if (!deckName.trim()) return;
+    const decks = storage.get("sg_decks", []);
+    const deck = { id: Date.now(), name: deckName, cards, created: Date.now(), lastStudied: null, color: DECK_COLORS[decks.length % DECK_COLORS.length] };
+    storage.set("sg_decks", [...decks, deck]);
+    onSave(); setShowSave(false);
+    showToast("✅ Deck saved!");
+    setTimeout(() => onNavigate("decks"), 700);
+  };
+
+  if (loading || pdfLoading) return (
+    <div className="screen" style={{ alignItems: "center", justifyContent: "center", gap: 20, padding: 40 }}>
+      <div style={{ width: 64, height: 64, border: "5px solid var(--border)", borderTopColor: "var(--primary)", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>
+          {pdfLoading ? "📄 Reading PDF..." : "✨ Generating Flashcards..."}
+        </div>
+        <div style={{ color: "var(--text-secondary)", fontSize: 14 }}>
+          {pdfLoading ? "Extracting text from your document" : "AI is creating your study cards"}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (step === "result") return (
+    <div className="screen">
+      <div className="topbar">
+        <button className="back-btn" onClick={() => setStep("input")}>←</button>
+        <span className="topbar-title">✨ {cards.length} Flashcards</span>
+        <button className="btn btn-primary btn-sm" onClick={() => setShowSave(true)}>💾 Save</button>
+      </div>
+      <div style={{ padding: "16px 20px 90px", overflowY: "auto" }}>
+        <div className="swipe-hint">👆 Tap any card to flip and see the answer</div>
+        {cards.map((card, i) => (
+          <div key={card.id} style={{ marginBottom: 16 }}>
+            <div className="flashcard-container" onClick={() => setFlipped(f => ({ ...f, [card.id]: !f[card.id] }))}>
+              <div className={`flashcard-inner ${flipped[card.id] ? "flipped" : ""}`}>
+                <div className="flashcard-face flashcard-front">
+                  <div className="flashcard-label">Question {i+1}</div>
+                  <div className="flashcard-text">{card.question}</div>
+                  <div style={{ marginTop: 12, fontSize: 12, opacity: 0.75 }}>Tap to reveal answer</div>
+                </div>
+                <div className="flashcard-face flashcard-back">
+                  <div className="flashcard-label">Answer</div>
+                  <div className="flashcard-text">{card.answer}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        <button className="btn btn-accent btn-full" onClick={() => onNavigate("quiz", { cards })} style={{ marginTop: 4 }}>🎯 Turn into Quiz</button>
+      </div>
+      {showSave && (
+        <div className="modal-overlay" onClick={() => setShowSave(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>💾 Save to Deck</h3>
+            <div className="input-group"><label className="input-label">Deck Name</label><input className="input" placeholder="e.g. Biology Chapter 3" value={deckName} onChange={e => setDeckName(e.target.value)} autoFocus /></div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setShowSave(false)}>Cancel</button>
+              <button className="btn btn-primary" style={{ flex: 2 }} onClick={saveCards} disabled={!deckName.trim()}>Save Deck</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="screen">
+      <div className="topbar">
+        <button className="back-btn" onClick={() => onNavigate("home")}>←</button>
+        <span className="topbar-title">✨ Generate Flashcards</span>
+        {!user.premium && <span className="badge badge-free">{Math.max(0, LIMIT - cardsToday)} left</span>}
+      </div>
+      <div style={{ padding: "16px 20px 90px", overflowY: "auto" }}>
+        {/* Mode toggle */}
+        <div style={{ display: "flex", gap: 0, marginBottom: 20, background: "var(--surface)", borderRadius: 14, padding: 4, boxShadow: "var(--shadow)" }}>
+          {[["pdf","📄 Upload PDF"],["text","✏️ Paste Notes"]].map(([mode, label]) => (
+            <button key={mode} onClick={() => setInputMode(mode)} style={{ flex: 1, padding: "10px 8px", border: "none", borderRadius: 11, cursor: "pointer", fontWeight: 600, fontSize: 13, transition: "all 0.2s", background: inputMode === mode ? "linear-gradient(135deg,var(--primary),var(--primary-dark))" : "transparent", color: inputMode === mode ? "#fff" : "var(--text-secondary)" }}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {inputMode === "pdf" ? (
+          <div>
+            <input ref={fileInputRef} type="file" accept=".pdf" style={{ display: "none" }} onChange={e => e.target.files[0] && handlePDFUpload(e.target.files[0])} />
+            <div
+              className={`pdf-dropzone ${dragOver ? "drag" : ""}`}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handlePDFUpload(f); }}
+            >
+              <div style={{ fontSize: 56, marginBottom: 12 }}>📄</div>
+              <div style={{ fontWeight: 700, fontSize: 16, color: "var(--primary)", marginBottom: 6 }}>
+                {pdfFile ? `✅ ${pdfFile.name}` : "Drop your PDF here"}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 16 }}>
+                {pdfFile ? "Click to upload a different file" : "or click to browse your files"}
+              </div>
+              <button className="btn btn-primary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                📂 Browse PDF
+              </button>
+            </div>
+            <div className="card" style={{ background: "var(--primary-light)", border: "1.5px solid #bfdbfe", marginTop: 16 }}>
+              <p style={{ fontSize: 13, color: "var(--primary-dark)", lineHeight: 1.6 }}>📚 <strong>How it works:</strong> Upload any PDF (lecture slides, textbook, notes) and AI automatically extracts key concepts and creates flashcards — no copy-pasting needed!</p>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="card" style={{ background: "var(--primary-light)", border: "1.5px solid #bfdbfe" }}>
+              <p style={{ fontSize: 13, color: "var(--primary-dark)", lineHeight: 1.6 }}>📝 <strong>Paste your notes</strong> — lecture notes, textbooks, or any material. AI extracts Q&A flashcards instantly.</p>
+            </div>
+            <div className="input-group">
+              <label className="input-label">Your Notes</label>
+              <textarea className="input" placeholder="Paste or type your study notes here..." style={{ minHeight: 220 }} value={notes} onChange={e => setNotes(e.target.value)} />
+            </div>
+            <button className="btn btn-primary btn-full" onClick={generate} disabled={!notes.trim()} style={{ fontSize: 16 }}>
+              ✨ Generate Flashcards
+            </button>
+          </div>
+        )}
+
+        <div className="card" style={{ padding: "14px 18px", marginTop: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>🔑 OpenAI API Key (optional)</div>
+          <input className="input" type="password" placeholder="sk-... for real AI generation" style={{ marginBottom: 4 }} defaultValue={apiKey} onChange={e => storage.set(AI_KEY, e.target.value)} />
+          <div style={{ fontSize: 11, color: "var(--text-secondary)" }}>Leave blank to use smart auto-generation</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── DECKS ──
+function DecksScreen({ user, onNavigate, refreshKey }) {
+  const [decks, setDecks] = useState(storage.get("sg_decks", []));
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [deleteId, setDeleteId] = useState(null);
+  useEffect(() => setDecks(storage.get("sg_decks", [])), [refreshKey]);
+
+  const createDeck = () => {
+    if (!newName.trim()) return;
+    const updated = [...decks, { id: Date.now(), name: newName, cards: [], created: Date.now(), lastStudied: null, color: DECK_COLORS[decks.length % DECK_COLORS.length] }];
+    storage.set("sg_decks", updated); setDecks(updated); setNewName(""); setShowCreate(false);
+  };
+  const deleteDeck = id => { const u = decks.filter(d => d.id !== id); storage.set("sg_decks", u); setDecks(u); setDeleteId(null); };
+
+  return (
+    <div className="screen">
+      <div className="topbar">
+        <button className="back-btn" onClick={() => onNavigate("home")}>←</button>
+        <span className="topbar-title">📚 My Decks</span>
+        <button className="btn btn-primary btn-sm" onClick={() => setShowCreate(true)}>+ New</button>
+      </div>
+      <div style={{ padding: "16px 20px 90px" }}>
+        {decks.length === 0 ? (
+          <div className="empty-state">
+            <div style={{ fontSize: 56 }}>📭</div>
+            <h3 style={{ fontWeight: 700 }}>No decks yet</h3>
+            <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Upload a PDF to get started</p>
+            <button className="btn btn-primary" onClick={() => onNavigate("generate")}>📄 Upload PDF</button>
+          </div>
+        ) : decks.map(deck => (
+          <div key={deck.id} className="deck-card">
+            <div onClick={() => onNavigate("study", { deck })} style={{ display: "flex", alignItems: "center", gap: 16, flex: 1 }}>
+              <div className="deck-icon" style={{ background: deck.color?.bg || DECK_COLORS[0].bg }}><span>{deck.color?.icon || "📚"}</span></div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 15 }}>{deck.name}</div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>{deck.cards?.length || 0} cards · {new Date(deck.created).toLocaleDateString()}</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={() => onNavigate("study", { deck })} className="btn btn-secondary btn-sm">Study</button>
+              <button onClick={() => setDeleteId(deck.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer", color: "var(--danger)", fontSize: 16 }}>🗑</button>
+            </div>
+          </div>
+        ))}
+      </div>
+      {showCreate && (
+        <div className="modal-overlay" onClick={() => setShowCreate(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>📁 Create New Deck</h3>
+            <div className="input-group"><label className="input-label">Deck Name</label><input className="input" placeholder="e.g. Physics Chapter 5" value={newName} onChange={e => setNewName(e.target.value)} onKeyDown={e => e.key === "Enter" && createDeck()} autoFocus /></div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setShowCreate(false)}>Cancel</button>
+              <button className="btn btn-primary" style={{ flex: 2 }} onClick={createDeck} disabled={!newName.trim()}>Create</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteId && (
+        <div className="modal-overlay" onClick={() => setDeleteId(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>🗑️ Delete Deck?</h3>
+            <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 20 }}>This cannot be undone.</p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setDeleteId(null)}>Cancel</button>
+              <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => deleteDeck(deleteId)}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── STUDY ──
+function StudyScreen({ user, onNavigate, params }) {
+  const [decks] = useState(storage.get("sg_decks", []));
+  const [selectedDeck, setSelectedDeck] = useState(params?.deck || null);
+  const [idx, setIdx] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [results, setResults] = useState({});
+  const [done, setDone] = useState(false);
+  const cards = selectedDeck?.cards || [];
+
+  const mark = (diff) => {
+    setResults(r => ({ ...r, [idx]: diff }));
+    setFlipped(false);
+    if (idx < cards.length - 1) setTimeout(() => setIdx(i => i + 1), 250);
+    else {
+      setDone(true);
+      const today = new Date().toDateString();
+      if (storage.get("sg_last_study", null) !== today) {
+        storage.set("sg_streak", (storage.get("sg_streak", 0)) + 1);
+        storage.set("sg_last_study", today);
+      }
+    }
+  };
+
+  if (!selectedDeck) return (
+    <div className="screen">
+      <div className="topbar"><button className="back-btn" onClick={() => onNavigate("home")}>←</button><span className="topbar-title">📖 Study Mode</span></div>
+      <div style={{ padding: "16px 20px 90px" }}>
+        {decks.length === 0 ? <div className="empty-state"><div style={{ fontSize: 56 }}>📭</div><h3 style={{ fontWeight: 700 }}>No decks yet</h3><button className="btn btn-primary" onClick={() => onNavigate("generate")}>📄 Upload PDF</button></div>
+          : decks.map(deck => (
+            <div key={deck.id} className="deck-card" onClick={() => setSelectedDeck(deck)}>
+              <div className="deck-icon" style={{ background: deck.color?.bg || DECK_COLORS[0].bg }}><span>{deck.color?.icon || "📚"}</span></div>
+              <div style={{ flex: 1 }}><div style={{ fontWeight: 700 }}>{deck.name}</div><div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{deck.cards?.length || 0} cards</div></div>
+              <span>›</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  );
+
+  if (done) {
+    const easy = Object.values(results).filter(r => r === "easy").length;
+    const hard = Object.values(results).filter(r => r === "hard").length;
+    return (
+      <div className="screen" style={{ alignItems: "center", justifyContent: "center", padding: "40px 24px", textAlign: "center", gap: 20 }}>
+        <div style={{ fontSize: 72 }}>🎉</div>
+        <h2 style={{ fontSize: 26, fontWeight: 800 }}>Session Complete!</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, width: "100%" }}>
+          <div className="stat-box" style={{ background: "#d1fae5" }}><div className="stat-number" style={{ color: "var(--success)" }}>{easy}</div><div className="stat-label">Easy ✅</div></div>
+          <div className="stat-box" style={{ background: "#fee2e2" }}><div className="stat-number" style={{ color: "var(--danger)" }}>{hard}</div><div className="stat-label">Hard 💪</div></div>
+        </div>
+        <div style={{ display: "flex", gap: 12, width: "100%" }}>
+          <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => { setIdx(0); setFlipped(false); setResults({}); setDone(false); }}>🔄 Restart</button>
+          <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => onNavigate("home")}>🏠 Home</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!cards.length) return <div className="screen" style={{ alignItems: "center", justifyContent: "center", gap: 16, padding: 24, textAlign: "center" }}><div style={{ fontSize: 56 }}>📭</div><h3>No cards in this deck</h3><button className="btn btn-primary" onClick={() => onNavigate("generate")}>Add Cards</button></div>;
+
+  const card = cards[idx];
+  return (
+    <div className="screen">
+      <div className="topbar">
+        <button className="back-btn" onClick={() => setSelectedDeck(null)}>←</button>
+        <span className="topbar-title">📖 {selectedDeck.name}</span>
+        <span style={{ fontSize: 13, color: "var(--text-secondary)", fontWeight: 600 }}>{idx+1}/{cards.length}</span>
+      </div>
+      <div style={{ padding: "20px", flex: 1, display: "flex", flexDirection: "column", gap: 20 }}>
+        <div><div className="progress-bar"><div className="progress-fill" style={{ width: `${(idx/cards.length)*100}%` }} /></div></div>
+        <div className="flashcard-container" onClick={() => setFlipped(f => !f)}>
+          <div className={`flashcard-inner ${flipped ? "flipped" : ""}`} style={{ height: 260 }}>
+            <div className="flashcard-face flashcard-front"><div className="flashcard-label">Question</div><div className="flashcard-text" style={{ fontSize: 20 }}>{card.question}</div><div style={{ marginTop: 16, fontSize: 13, opacity: 0.75, background: "rgba(255,255,255,0.2)", borderRadius: 8, padding: "6px 14px" }}>👆 Tap to flip</div></div>
+            <div className="flashcard-face flashcard-back"><div className="flashcard-label">Answer</div><div className="flashcard-text" style={{ fontSize: 18 }}>{card.answer}</div></div>
+          </div>
+        </div>
+        {flipped
+          ? <div style={{ animation: "slideUp 0.3s ease" }}>
+              <p style={{ textAlign: "center", fontSize: 14, color: "var(--text-secondary)", marginBottom: 12 }}>How well did you know this?</p>
+              <div style={{ display: "flex", gap: 12 }}><button className="diff-btn diff-hard" onClick={() => mark("hard")}>😓 Hard</button><button className="diff-btn diff-easy" onClick={() => mark("easy")}>😊 Easy</button></div>
+            </div>
+          : <div style={{ display: "flex", gap: 12 }}>
+              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setIdx(i => Math.max(0, i-1))} disabled={idx === 0}>← Prev</button>
+              <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setFlipped(true)}>Show Answer</button>
+            </div>
+        }
+      </div>
+    </div>
+  );
+}
+
+// ── QUIZ ──
+function QuizScreen({ user, onNavigate, params }) {
+  const [decks] = useState(storage.get("sg_decks", []));
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [qIdx, setQIdx] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [answered, setAnswered] = useState(false);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const apiKey = storage.get(AI_KEY, "");
+  const today = new Date().toDateString();
+  const quizzesToday = storage.get(`sg_quizzes_${today}`, 0);
+
+  useEffect(() => { if (params?.cards?.length) startFromCards(params.cards); }, []);
+
+  const startFromCards = async (cards) => {
+    if (!user.premium && quizzesToday >= 1) { onNavigate("premium"); return; }
+    setLoading(true);
+    const qs = await generateQuizAI(cards, apiKey);
+    storage.set(`sg_quizzes_${today}`, quizzesToday + 1);
+    const s = storage.get("sg_quiz_stats", { total: 0, scores: [] });
+    storage.set("sg_quiz_stats", { ...s, total: s.total + 1 });
+    setQuestions(qs); setStarted(true); setLoading(false);
+  };
+
+  const answer = (i) => { if (answered) return; setSelected(i); setAnswered(true); if (i === questions[qIdx].correct) setScore(s => s + 1); };
+  const next = () => { if (qIdx < questions.length - 1) { setQIdx(q => q+1); setSelected(null); setAnswered(false); } else { setDone(true); const p = Math.round(score/questions.length*100); const s = storage.get("sg_quiz_stats", {total:0,scores:[]}); storage.set("sg_quiz_stats", {...s, scores:[...(s.scores||[]),p]}); } };
+  const reset = () => { setQIdx(0); setSelected(null); setAnswered(false); setScore(0); setDone(false); };
+
+  if (done) {
+    const pct = Math.round(score/questions.length*100);
+    return (
+      <div className="screen" style={{ padding: "40px 24px", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 20 }}>
+        <h2 style={{ fontSize: 26, fontWeight: 800 }}>Quiz Complete! {pct>=80?"🏆":pct>=60?"👍":"💪"}</h2>
+        <div style={{ position: "relative", width: 140, height: 140, margin: "0 auto" }}>
+          <svg width="140" height="140" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)" }}>
+            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--border)" strokeWidth="12" />
+            <circle cx="70" cy="70" r="60" fill="none" stroke={pct>=80?"#10B981":pct>=60?"#2E5DA8":"#F59E0B"} strokeWidth="12" strokeDasharray={`${pct*3.77} 377`} strokeLinecap="round" />
+          </svg>
+          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ fontSize: 32, fontWeight: 800, color: pct>=80?"var(--success)":"var(--primary)" }}>{pct}%</div>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Score</div>
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, width: "100%" }}>
+          <div className="stat-box" style={{ background: "#d1fae5" }}><div className="stat-number" style={{ color: "var(--success)" }}>{score}</div><div className="stat-label">Correct ✅</div></div>
+          <div className="stat-box" style={{ background: "#fee2e2" }}><div className="stat-number" style={{ color: "var(--danger)" }}>{questions.length-score}</div><div className="stat-label">Wrong ❌</div></div>
+        </div>
+        <div style={{ display: "flex", gap: 12, width: "100%" }}>
+          <button className="btn btn-ghost" style={{ flex: 1 }} onClick={reset}>🔄 Retry</button>
+          <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => onNavigate("home")}>🏠 Home</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) return <div className="screen" style={{ alignItems: "center", justifyContent: "center", gap: 16 }}><div style={{ width: 50, height: 50, border: "4px solid var(--border)", borderTopColor: "var(--primary)", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} /><p style={{ color: "var(--text-secondary)" }}>Generating quiz...</p></div>;
+
+  if (!started) return (
+    <div className="screen">
+      <div className="topbar"><button className="back-btn" onClick={() => onNavigate("home")}>←</button><span className="topbar-title">🧪 Take a Quiz</span>{!user.premium && <span className="badge badge-free">{Math.max(0,1-quizzesToday)} left</span>}</div>
+      <div style={{ padding: "16px 20px 90px" }}>
+        {decks.filter(d => d.cards?.length > 0).length === 0
+          ? <div className="empty-state"><div style={{ fontSize: 56 }}>🧪</div><h3 style={{ fontWeight: 700 }}>No decks available</h3><button className="btn btn-primary" onClick={() => onNavigate("generate")}>📄 Upload PDF</button></div>
+          : decks.filter(d => d.cards?.length > 0).map(deck => (
+            <div key={deck.id} className="deck-card" onClick={() => startFromCards(deck.cards)}>
+              <div className="deck-icon" style={{ background: deck.color?.bg || DECK_COLORS[0].bg }}><span>{deck.color?.icon || "📚"}</span></div>
+              <div style={{ flex: 1 }}><div style={{ fontWeight: 700 }}>{deck.name}</div><div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{deck.cards?.length} cards → ~{Math.min(6,deck.cards.length)} questions</div></div>
+              <button className="btn btn-primary btn-sm">Start →</button>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  );
+
+  const q = questions[qIdx];
+  const opts = q.type === "tf" ? ["True","False"] : q.options;
+  return (
+    <div className="screen">
+      <div className="topbar"><button className="back-btn" onClick={() => { setStarted(false); reset(); }}>←</button><span className="topbar-title">🧪 Quiz</span><span style={{ fontSize: 13, color: "var(--text-secondary)", fontWeight: 600 }}>{qIdx+1}/{questions.length}</span></div>
+      <div style={{ padding: "16px 20px", flex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
+        <div><div className="progress-bar"><div className="progress-fill" style={{ width: `${(qIdx/questions.length)*100}%` }} /></div><div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 12, color: "var(--text-secondary)" }}><span>Question {qIdx+1} of {questions.length}</span><span style={{ color: "var(--success)", fontWeight: 600 }}>✅ {score} correct</span></div></div>
+        <div className="card" style={{ background: "var(--primary-light)", border: "1.5px solid #bfdbfe" }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+            <span className="tag">{q.type === "tf" ? "T/F" : "MCQ"}</span>
+            <p style={{ fontWeight: 600, fontSize: 16, color: "var(--text)", lineHeight: 1.5 }}>{q.question}</p>
+          </div>
+        </div>
+        <div>
+          {opts.map((opt, i) => {
+            if (!opt) return null;
+            let cls = "quiz-option";
+            if (answered) { if (i === q.correct) cls += " correct"; else if (i === selected) cls += " wrong"; cls += " disabled"; }
+            return (
+              <div key={i} className={cls} onClick={() => answer(i)}>
+                <span style={{ width: 28, height: 28, background: answered ? (i === q.correct ? "#10B981" : i === selected ? "#EF4444" : "var(--border)") : "var(--bg)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
+                  {answered ? (i === q.correct ? "✓" : i === selected ? "✗" : String.fromCharCode(65+i)) : String.fromCharCode(65+i)}
+                </span>
+                {opt}
+              </div>
+            );
+          })}
+        </div>
+        {answered && (
+          <div style={{ animation: "slideUp 0.3s ease" }}>
+            <div className="card" style={{ background: selected===q.correct?"#d1fae5":"#fee2e2", border: `1.5px solid ${selected===q.correct?"#6ee7b7":"#fca5a5"}`, marginBottom: 12 }}>
+              <div style={{ fontWeight: 700, color: selected===q.correct?"#065f46":"#991b1b", marginBottom: 4 }}>{selected===q.correct?"✅ Correct!":"❌ Incorrect"}</div>
+              {selected !== q.correct && <div style={{ fontSize: 13 }}>Answer: <strong>{opts[q.correct]}</strong></div>}
+            </div>
+            <button className="btn btn-primary btn-full" onClick={next}>{qIdx < questions.length-1 ? "Next →" : "🏁 See Results"}</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── PAYMENT FORM (FULLY FIXED) ──
+function PaymentForm({ plan, onSuccess, onCancel }) {
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [name, setName] = useState("");
+  const [processing, setProcessing] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  const formatCard = (val) => {
+    const digits = val.replace(/\D/g, "").substring(0, 16);
+    return digits.replace(/(.{4})/g, "$1 ").trim();
+  };
+  const formatExpiry = (val) => {
+    const digits = val.replace(/\D/g, "").substring(0, 4);
+    if (digits.length >= 3) return digits.substring(0,2) + "/" + digits.substring(2);
+    return digits;
+  };
+  const getCardBrand = (num) => {
+    const n = num.replace(/\s/g, "");
+    if (/^4/.test(n)) return { name: "Visa" };
+    if (/^5[1-5]/.test(n)) return { name: "MC" };
+    if (/^3[47]/.test(n)) return { name: "Amex" };
+    if (/^6(?:011|5)/.test(n)) return { name: "Discover" };
+    return null;
+  };
+
+  const validate = () => {
+    if (!name.trim()) { setError("Please enter the cardholder name"); return false; }
+    const rawCard = cardNumber.replace(/\s/g, "");
+    if (rawCard.length < 15) { setError("Please enter a valid card number"); return false; }
+    if (!luhnCheck(rawCard)) { setError("Card number is invalid. Please check and try again"); return false; }
+    if (expiry.length < 5) { setError("Please enter a valid expiry date (MM/YY)"); return false; }
+    const [mm, yy] = expiry.split("/");
+    const m = parseInt(mm, 10);
+    if (m < 1 || m > 12) { setError("Invalid expiry month (01–12)"); return false; }
+    if (isExpired(mm, yy)) { setError("This card has expired. Please use a valid card"); return false; }
+    const brand = getCardBrand(cardNumber);
+    const isAmex = brand?.name === "Amex";
+    if (cvv.length < (isAmex ? 4 : 3)) { setError(`Please enter a valid ${isAmex ? "4-digit" : "3-digit"} CVV`); return false; }
+    return true;
+  };
+
+  const handlePayment = async () => {
+    setError("");
+    if (!validate()) return;
+    setProcessing(true);
+    await new Promise(r => setTimeout(r, 2200));
+    setProcessing(false);
+    setSuccess(true);
+    setTimeout(() => onSuccess(), 1500);
+  };
+
+  const brand = getCardBrand(cardNumber);
+  const price = plan === "yearly" ? "$29.99/year" : "$3.99/month";
+
+  if (success) return (
+    <div style={{ padding: "36px 20px", textAlign: "center" }}>
+      <div style={{ width: 72, height: 72, background: "var(--gradient-green)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, margin: "0 auto 20px", boxShadow: "0 8px 24px rgba(16,185,129,0.35)", animation: "countUp 0.5s ease" }}>✓</div>
+      <div style={{ fontWeight: 900, fontSize: 22, marginBottom: 8, letterSpacing: -0.3 }}>Payment Successful! 🎉</div>
+      <div style={{ color: "var(--text-secondary)", fontSize: 14, fontWeight: 500 }}>Welcome to Premium! Unlocking your account...</div>
+    </div>
+  );
+
+  if (processing) return (
+    <div style={{ padding: "36px 20px", textAlign: "center" }}>
+      <div style={{ width: 64, height: 64, border: "6px solid var(--border)", borderTopColor: "var(--primary)", borderRadius: "50%", animation: "spin 0.75s linear infinite", margin: "0 auto 20px" }} />
+      <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>Processing Payment...</div>
+      <div style={{ color: "var(--text-secondary)", fontSize: 14, fontWeight: 500 }}>🔒 Secured with 256-bit TLS encryption</div>
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+        <h3 style={{ fontSize: 20, fontWeight: 900, letterSpacing: -0.3 }}>💳 Payment Details</h3>
+        <span className="secure-badge">🔒 SSL Secured</span>
+      </div>
+      <div style={{ background: "var(--gradient-card)", borderRadius: 16, padding: "18px 20px", color: "#fff", marginBottom: 22, display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 8px 24px rgba(79,70,229,0.25)" }}>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 3 }}>👑 Learnify AI Premium</div>
+          <div style={{ opacity: 0.85, fontSize: 12, fontWeight: 500 }}>{plan === "yearly" ? "Annual Plan · Save 37%" : "Monthly Plan"} · Cancel anytime</div>
+        </div>
+        <div style={{ fontWeight: 900, fontSize: 22, letterSpacing: -0.5 }}>
+          {plan === "yearly" ? "$29.99" : "$3.99"}
+          <span style={{ fontSize: 12, fontWeight: 500, opacity: 0.85 }}>{plan === "yearly" ? "/yr" : "/mo"}</span>
+        </div>
+      </div>
+      <div className="input-group">
+        <label className="input-label">Cardholder Name</label>
+        <input className="card-field" placeholder="Jane Smith" value={name} onChange={e => setName(e.target.value)} />
+      </div>
+      <div className="input-group">
+        <label className="input-label">Card Number</label>
+        <div style={{ position: "relative" }}>
+          <input className="card-field" placeholder="1234 5678 9012 3456" value={cardNumber} onChange={e => setCardNumber(formatCard(e.target.value))} maxLength={19} style={{ paddingRight: brand ? 64 : 16 }} />
+          {brand && <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 12, fontWeight: 700, color: "var(--primary)", background: "var(--primary-light)", padding: "3px 8px", borderRadius: 6 }}>{brand.name}</span>}
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="input-group">
+          <label className="input-label">Expiry Date</label>
+          <input className="card-field" placeholder="MM/YY" value={expiry} onChange={e => setExpiry(formatExpiry(e.target.value))} maxLength={5} />
+        </div>
+        <div className="input-group">
+          <label className="input-label">CVV {brand?.name === "Amex" ? "(4-digit)" : "(3-digit)"}</label>
+          <input className="card-field" placeholder={brand?.name === "Amex" ? "••••" : "•••"} type="password" value={cvv} onChange={e => setCvv(e.target.value.replace(/\D/g,"").substring(0, brand?.name === "Amex" ? 4 : 3))} maxLength={brand?.name === "Amex" ? 4 : 3} />
+        </div>
+      </div>
+      {error && <div style={{ color: "#991b1b", fontSize: 13, marginBottom: 16, padding: "12px 16px", background: "#fee2e2", borderRadius: 12, fontWeight: 600, border: "1.5px solid #fca5a5" }}>⚠️ {error}</div>}
+      <div style={{ display: "flex", gap: 8, marginBottom: 18, alignItems: "center", flexWrap: "wrap" }}>
+        <span style={{ fontSize: 11, color: "var(--text-secondary)", fontWeight: 600 }}>Accepted:</span>
+        {["Visa","Mastercard","Amex","Discover"].map(b => (
+          <div key={b} style={{ background: "var(--bg)", border: "1.5px solid var(--border)", borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, color: "var(--text-secondary)" }}>{b}</div>
+        ))}
+      </div>
+      <button className="btn btn-primary btn-full" onClick={handlePayment} style={{ fontSize: 16, padding: "17px", marginBottom: 12, borderRadius: 16 }}>
+        🔒 Pay {price}
+      </button>
+      <button className="btn btn-ghost btn-full" onClick={onCancel} style={{ fontSize: 14 }}>Cancel</button>
+      <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-secondary)", marginTop: 14, lineHeight: 1.6, fontWeight: 500 }}>
+        🔒 256-bit SSL encryption · PCI DSS compliant · Cancel anytime from your profile.
+      </p>
+    </div>
+  );
+}
+
+// ── PREMIUM (REDESIGNED WITH PLAN SELECTION) ──
+function PremiumScreen({ user, onNavigate, onUpgrade }) {
+  const [selectedPlan, setSelectedPlan] = useState("monthly");
+  const [showPayment, setShowPayment] = useState(false);
+
+  const handleSuccess = () => {
+    setShowPayment(false);
+    onUpgrade();
+  };
+
+  const testimonials = [
+    { name: "Sarah K.", role: "Med Student", text: "Went from failing to top 10% in my class!", stars: 5, avatar: "👩‍⚕️" },
+    { name: "James T.", role: "Law Student", text: "Passed the bar exam first attempt using Learnify!", stars: 5, avatar: "👨‍⚖️" },
+    { name: "Priya M.", role: "Engineering", text: "Converts my PDFs into perfect cards in seconds.", stars: 5, avatar: "👩‍💻" },
+  ];
+
+  if (showPayment) return (
+    <div className="screen">
+      <div className="topbar">
+        <button className="back-btn" onClick={() => setShowPayment(false)}>← Back</button>
+        <span className="topbar-title">💳 Secure Checkout</span>
+      </div>
+      <div style={{ padding: "20px 20px 48px", overflowY: "auto" }}>
+        <PaymentForm plan={selectedPlan} onSuccess={handleSuccess} onCancel={() => setShowPayment(false)} />
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="screen">
+      <div className="topbar"><button className="back-btn" onClick={() => onNavigate("home")}>← Home</button><span className="topbar-title">👑 Go Premium</span></div>
+      <div style={{ overflowY: "auto", paddingBottom: 48 }}>
+        {/* Hero */}
+        <div style={{ background: "linear-gradient(145deg,#4F46E5 0%,#7C3AED 55%,#10B981 100%)", padding: "36px 24px 44px", color: "#fff", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, background: "rgba(255,255,255,0.06)", borderRadius: "50%" }} />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.15)", borderRadius: 50, padding: "7px 18px", fontSize: 13, fontWeight: 700, marginBottom: 18, backdropFilter: "blur(10px)" }}>
+              ⭐ Trusted by 12,000+ students worldwide
+            </div>
+            <h1 style={{ fontSize: 30, fontWeight: 900, letterSpacing: -0.8, marginBottom: 12, lineHeight: 1.2 }}>Unlock Your Full Learning Potential</h1>
+            <p style={{ opacity: 0.9, fontSize: 14, lineHeight: 1.7, maxWidth: 300, margin: "0 auto" }}>
+              Remove all limits. Study smarter with unlimited AI flashcards, quizzes, and PDF uploads.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ padding: "0 20px" }}>
+          {/* Plan Selection */}
+          <div style={{ marginTop: 28, marginBottom: 6 }}>
+            <h3 style={{ fontSize: 12, fontWeight: 800, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 14 }}>Choose Your Plan</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              {/* Monthly */}
+              <div className={"plan-card" + (selectedPlan === "monthly" ? " selected" : "")} onClick={() => setSelectedPlan("monthly")}>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid " + (selectedPlan === "monthly" ? "var(--primary)" : "var(--border)"), background: selectedPlan === "monthly" ? "var(--primary)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {selectedPlan === "monthly" && <div style={{ width: 8, height: 8, background: "#fff", borderRadius: "50%" }} />}
+                  </div>
+                </div>
+                <div style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", letterSpacing: -0.5 }}>$3.99</div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)", fontWeight: 600, marginTop: 2 }}>per month</div>
+                <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 6, fontWeight: 500 }}>Cancel anytime</div>
+              </div>
+              {/* Yearly */}
+              <div className={"plan-card" + (selectedPlan === "yearly" ? " selected" : "")} onClick={() => setSelectedPlan("yearly")} style={{ position: "relative" }}>
+                <div style={{ position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 12px", borderRadius: 50, whiteSpace: "nowrap" }}>🔥 BEST VALUE</div>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8, marginTop: 8 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid " + (selectedPlan === "yearly" ? "var(--primary)" : "var(--border)"), background: selectedPlan === "yearly" ? "var(--primary)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {selectedPlan === "yearly" && <div style={{ width: 8, height: 8, background: "#fff", borderRadius: "50%" }} />}
+                  </div>
+                </div>
+                <div style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", letterSpacing: -0.5 }}>$29.99</div>
+                <div style={{ fontSize: 12, color: "var(--success)", fontWeight: 700, marginTop: 2 }}>per year</div>
+                <div style={{ background: "var(--accent-light)", color: "#065f46", fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 50, marginTop: 6, display: "inline-block" }}>Save 37%</div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <button className="btn btn-primary btn-full" onClick={() => setShowPayment(true)} style={{ marginTop: 20, fontSize: 16, padding: "18px", borderRadius: 18, boxShadow: "0 8px 28px rgba(79,70,229,0.4)" }}>
+            👑 {selectedPlan === "yearly" ? "Get Annual — $29.99/yr" : "Get Monthly — $3.99/mo"} →
+          </button>
+          <p style={{ textAlign: "center", fontSize: 12, color: "var(--text-secondary)", marginTop: 10, fontWeight: 500 }}>🔒 Secure · Cancel anytime · No hidden fees</p>
+
+          {/* Features */}
+          <div style={{ marginTop: 28 }}>
+            <h3 style={{ fontSize: 12, fontWeight: 800, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 14 }}>Everything Included</h3>
+            <div className="card" style={{ padding: "6px 20px", border: "1.5px solid var(--border)" }}>
+              {[["✨","Unlimited Flashcards","No daily limits, ever"],["📄","Unlimited PDF Uploads","Any size, any subject"],["🧪","Unlimited Quizzes","Test yourself freely"],["🤖","Priority AI","Faster & smarter output"],["🚫","Ad-Free","Pure focus mode"],["📊","Advanced Analytics","Track every improvement"],["🔥","Streak Protection","Never lose your streak"],["☁️","Cloud Sync","Access your decks anywhere"]].map(([icon,title,desc]) => (
+                <div key={title} className="paywall-feature">
+                  <div style={{ width: 38, height: 38, background: "var(--primary-light)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{icon}</div>
+                  <div><div style={{ fontWeight: 700, fontSize: 14 }}>{title}</div><div style={{ fontSize: 12, color: "var(--text-secondary)", fontWeight: 500 }}>{desc}</div></div>
+                  <div style={{ marginLeft: "auto", color: "var(--success)", fontSize: 16, fontWeight: 700 }}>✓</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Testimonials */}
+          <div style={{ marginTop: 28 }}>
+            <h3 style={{ fontSize: 12, fontWeight: 800, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 14 }}>What Students Say</h3>
+            {testimonials.map((t, i) => (
+              <div key={i} className="testimonial-card" style={{ marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                  <div style={{ width: 40, height: 40, background: "var(--primary-light)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{t.avatar}</div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14 }}>{t.name}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-secondary)", fontWeight: 600 }}>{t.role}</div>
+                  </div>
+                  <div className="star-rating" style={{ marginLeft: "auto" }}>{"★".repeat(t.stars)}</div>
+                </div>
+                <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontWeight: 500 }}>"{t.text}"</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Stats */}
+          <div style={{ marginTop: 24, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 32 }}>
+            {[["12K+","Students"],["4.9★","Rating"],["98%","Pass Rate"]].map(([val, label]) => (
+              <div key={label} style={{ background: "var(--surface)", borderRadius: 16, padding: "16px 8px", textAlign: "center", boxShadow: "var(--shadow-sm)", border: "1.5px solid var(--border)" }}>
+                <div style={{ fontSize: 20, fontWeight: 900, color: "var(--primary)", letterSpacing: -0.5 }}>{val}</div>
+                <div style={{ fontSize: 11, color: "var(--text-secondary)", fontWeight: 600, marginTop: 3, textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          <button className="btn btn-primary btn-full" onClick={() => setShowPayment(true)} style={{ fontSize: 16, padding: "18px", borderRadius: 18, boxShadow: "0 8px 28px rgba(79,70,229,0.4)" }}>
+            👑 Start Premium Today →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── PROFILE ──
+function ProfileScreen({ user, onNavigate, onLogout }) {
+  const decks = storage.get("sg_decks", []);
+  const qStats = storage.get("sg_quiz_stats", { total: 0, scores: [] });
+  const streak = storage.get("sg_streak", 0);
+  const avg = qStats.scores?.length ? Math.round(qStats.scores.reduce((a,b)=>a+b,0)/qStats.scores.length) : 0;
+  return (
+    <div className="screen">
+      <div className="topbar"><button className="back-btn" onClick={() => onNavigate("home")}>←</button><span className="topbar-title">👤 Profile</span></div>
+      <div style={{ padding: "20px 20px 90px" }}>
+        <div className="card" style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20, padding: 20 }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg,#2E5DA8,#4CC46A)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, color: "#fff", fontWeight: 700 }}>{(user.name||"A")[0].toUpperCase()}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 800, fontSize: 17 }}>{user.name}</div>
+            <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>{user.email}</div>
+            {user.premium ? <span className="badge badge-premium" style={{ marginTop: 4 }}>👑 Premium</span> : <span className="badge badge-free" style={{ marginTop: 4 }}>Free Plan</span>}
+          </div>
+        </div>
+        <h3 style={{ fontWeight: 700, marginBottom: 12 }}>📊 Your Stats</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
+          <div className="stat-box"><div className="stat-number">{decks.length}</div><div className="stat-label">Decks</div></div>
+          <div className="stat-box"><div className="stat-number">{decks.reduce((a,d)=>a+(d.cards?.length||0),0)}</div><div className="stat-label">Cards</div></div>
+          <div className="stat-box"><div className="stat-number">🔥{streak}</div><div className="stat-label">Streak</div></div>
+          <div className="stat-box"><div className="stat-number">{qStats.total}</div><div className="stat-label">Quizzes</div></div>
+          <div className="stat-box" style={{ gridColumn: "2/4" }}><div className="stat-number">{avg}%</div><div className="stat-label">Avg Score</div></div>
+        </div>
+        {qStats.scores?.length > 0 && (
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h4 style={{ fontWeight: 700, marginBottom: 12 }}>📈 Score History</h4>
+            <div style={{ display: "flex", gap: 6, alignItems: "flex-end", height: 60 }}>
+              {qStats.scores.slice(-10).map((s,i) => (
+                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                  <div style={{ width: "100%", background: s>=80?"var(--success)":s>=60?"var(--primary)":"var(--warning)", borderRadius: "4px 4px 0 0", height: `${(s/100)*50}px`, minHeight: 4 }} />
+                  <span style={{ fontSize: 9, color: "var(--text-secondary)" }}>{s}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {!user.premium && <div className="premium-banner" style={{ marginBottom: 20, cursor: "pointer" }} onClick={() => onNavigate("premium")}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><div><div style={{ fontWeight: 700, fontSize: 16 }}>👑 Go Premium</div><div style={{ opacity: 0.85, fontSize: 13 }}>Unlimited everything – $3.99/mo</div></div><button className="btn" style={{ background: "#fff", color: "var(--primary)", padding: "8px 16px", fontSize: 13 }} onClick={e=>{e.stopPropagation();onNavigate("premium");}}>Upgrade →</button></div></div>}
+        <button className="btn btn-ghost btn-full" style={{ color: "var(--danger)", borderColor: "#fca5a5" }} onClick={onLogout}>🚪 Sign Out</button>
+      </div>
+    </div>
+  );
+}
+
+
+// ── DESKTOP SIDEBAR ──
+function DesktopSidebar({ user, activeTab, onNavigate, onLogout }) {
+  const tabs = [
+    { id: "home", icon: "🏠", label: "Home" },
+    { id: "generate", icon: "📄", label: "Upload PDF" },
+    { id: "decks", icon: "📚", label: "My Decks" },
+    { id: "study", icon: "📖", label: "Study Mode" },
+    { id: "quiz", icon: "🧪", label: "Take Quiz" },
+    { id: "premium", icon: "👑", label: "Premium" },
+  ];
+  return (
+    <div className="desktop-sidebar" style={{ display: "none" }}>
+      <div className="sidebar-logo">
+        <BrandLogo size={38} />
+        <BrandName fontSize={18} />
+      </div>
+      <div style={{ flex: 1 }}>
+        {tabs.map(tab => (
+          <button key={tab.id} className={`sidebar-nav-item ${activeTab === tab.id ? "active" : ""}`} onClick={() => onNavigate(tab.id)}>
+            <span className="nav-icon">{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+      <div className="sidebar-bottom">
+        <div onClick={() => onNavigate("profile")} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 6px", cursor: "pointer", borderRadius: 12, marginBottom: 8 }}>
+          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#2E5DA8,#4CC46A)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: "#fff", fontWeight: 700, flexShrink: 0 }}>
+            {(user.name || "A")[0].toUpperCase()}
+          </div>
+          <div style={{ overflow: "hidden" }}>
+            <div style={{ fontWeight: 700, fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</div>
+            <div style={{ fontSize: 11, color: "var(--text-secondary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</div>
+          </div>
+        </div>
+        <button className="btn btn-ghost btn-full btn-sm" style={{ color: "var(--danger)", borderColor: "#fca5a5" }} onClick={onLogout}>🚪 Sign Out</button>
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN APP ──
+function App() {
+  const [onboarded] = useState(storage.get("sg_onboarded", false));
+  const [showOnboard, setShowOnboard] = useState(!onboarded);
+  const [user, setUser] = useState(storage.get("sg_current", null));
+  const [screen, setScreen] = useState("home");
+  const [params, setParams] = useState({});
+  const [deckRefresh, setDeckRefresh] = useState(0);
+  const [toast, setToast] = useState(null);
+  const [activeTab, setActiveTab] = useState("home");
+
+  const showToast = useCallback((msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); }, []);
+  const navigate = (s, p = {}) => { setScreen(s); setParams(p); if (["home","generate","decks","study","quiz"].includes(s)) setActiveTab(s); };
+  const handleAuth = (u) => { setUser(u); setScreen("home"); };
+  const handleLogout = () => { storage.set("sg_current", null); setUser(null); setScreen("home"); };
+  const handleUpgrade = () => {
+    const u = {...user, premium: true};
+    setUser(u);
+    storage.set("sg_current", u);
+    const users = storage.get("sg_users",[]);
+    storage.set("sg_users", users.map(x => x.email===user.email?{...x,premium:true}:x));
+    showToast("👑 Welcome to Premium!");
+    navigate("home");
+  };
+
+  const decks = storage.get("sg_decks", []);
+  const stats = { totalCards: decks.reduce((a,d)=>a+(d.cards?.length||0),0), totalQuizzes: storage.get("sg_quiz_stats",{total:0}).total, streak: storage.get("sg_streak",0), recentDecks: [...decks].sort((a,b)=>(b.lastStudied||0)-(a.lastStudied||0)) };
+
+  if (showOnboard && !onboarded) return <OnboardingScreen onDone={() => { storage.set("sg_onboarded", true); setShowOnboard(false); }} />;
+  if (!user) return <AuthScreen onAuth={handleAuth} />;
+
+  const tabs = [
+    { id: "home", icon: "🏠", label: "Home" },
+    { id: "generate", icon: "📄", label: "Upload" },
+    { id: "decks", icon: "📚", label: "Decks" },
+    { id: "study", icon: "📖", label: "Study" },
+    { id: "quiz", icon: "🧪", label: "Quiz" },
+  ];
+
+  const renderScreen = () => {
+    switch(screen) {
+      case "home": return <HomeScreen user={user} onNavigate={navigate} stats={stats} />;
+      case "generate": return <GeneratorScreen user={user} onNavigate={navigate} onSave={() => setDeckRefresh(r=>r+1)} showToast={showToast} />;
+      case "decks": return <DecksScreen user={user} onNavigate={navigate} refreshKey={deckRefresh} />;
+      case "study": return <StudyScreen user={user} onNavigate={navigate} params={params} />;
+      case "quiz": return <QuizScreen user={user} onNavigate={navigate} params={params} />;
+      case "premium": return <PremiumScreen user={user} onNavigate={navigate} onUpgrade={handleUpgrade} />;
+      case "profile": return <ProfileScreen user={user} onNavigate={navigate} onLogout={handleLogout} />;
+      default: return <HomeScreen user={user} onNavigate={navigate} stats={stats} />;
+    }
+  };
+
+  return (
+    <div className="app-shell">
+      <DesktopSidebar user={user} activeTab={activeTab} onNavigate={navigate} onLogout={handleLogout} />
+      <div className="desktop-main">
+        {renderScreen()}
+        {!["premium","profile"].includes(screen) && (
+          <nav className="bottom-nav">
+            {tabs.map(tab => (
+              <button key={tab.id} className={`nav-item ${activeTab===tab.id?"active":""}`} onClick={() => navigate(tab.id)}>
+                <span className="nav-icon">{tab.icon}</span>
+                <span style={{ color: activeTab===tab.id?"var(--primary)":"var(--text-secondary)" }}>{tab.label}</span>
+              </button>
+            ))}
+          </nav>
+        )}
+        {toast && <Toast message={toast} />}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
